@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulateur d'épargne</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      color: #0D1B2A;
+      min-height: 100vh;
+      padding: 1.25rem 1rem 2rem;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #0D1B2A;
+      letter-spacing: 0.01em;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: #4a6080;
+      margin-bottom: 6px;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .input-wrap {
+      display: flex;
+      align-items: center;
+      border: 1px solid #c5d3e0;
+      border-radius: 8px;
+      padding: 0 12px;
+      background: #ffffff;
+      height: 46px;
+      transition: border-color 0.15s;
+    }
+
+    .input-wrap:focus-within {
+      border-color: #1a4d8f;
+      box-shadow: 0 0 0 3px rgba(26,77,143,0.12);
+    }
+
+    .input-wrap span {
+      font-size: 14px;
+      color: #7a95b0;
+      font-weight: 500;
+    }
+
+    .input-wrap input {
+      border: none;
+      background: transparent;
+      font-size: 15px;
+      font-weight: 600;
+      width: 100%;
+      outline: none;
+      color: #0D1B2A;
+      font-family: inherit;
+    }
+
+    .summary {
+      background: #0D1B2A;
+      border-radius: 14px;
+      padding: 20px;
+      margin: 1.5rem 0;
+    }
+
+    .summary-main {
+      margin-bottom: 16px;
+    }
+
+    .summary-main .label {
+      font-size: 11px;
+      color: #7a9ec0;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .summary-main .value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+
+    .summary-sub {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 14px;
+    }
+
+    .summary-sub .label {
+      font-size: 11px;
+      color: #7a9ec0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .summary-sub .value {
+      font-size: 18px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .summary-sub .value.accent {
+      color: #5b9bd5;
+    }
+
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+      height: 180px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #4a6080;
+      font-weight: 500;
+    }
+
+    .legend span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend .dot-blue {
+      width: 12px;
+      height: 2.5px;
+      background: #1a4d8f;
+      border-radius: 2px;
+    }
+
+    .legend .dot-gray {
+      width: 12px;
+      height: 0;
+      border-top: 2px dashed #c5d3e0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Simulateur d'épargne</h1>
+
+  <div class="grid-2">
+    <div>
+      <label>Capital initial</label>
+      <div class="input-wrap">
+        <span style="margin-right:5px">€</span>
+        <input type="number" id="capital" value="10000" min="0" step="500" inputmode="numeric">
+      </div>
+    </div>
+    <div>
+      <label>Versement mensuel</label>
+      <div class="input-wrap">
+        <span style="margin-right:5px">€</span>
+        <input type="number" id="mensuel" value="500" min="0" step="50" inputmode="numeric">
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <label>Taux annuel net</label>
+      <div class="input-wrap">
+        <input type="number" id="taux" value="4" min="0" max="30" step="0.5" inputmode="decimal">
+        <span>%</span>
+      </div>
+    </div>
+    <div>
+      <label>Durée</label>
+      <div class="input-wrap">
+        <input type="number" id="duree" value="15" min="1" max="50" step="1" inputmode="numeric">
+        <span>ans</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="summary-main">
+      <p class="label">Capital final</p>
+      <p class="value" id="stat-final">—</p>
+    </div>
+    <div class="summary-sub">
+      <div>
+        <p class="label">Total versé</p>
+        <p class="value" id="stat-verse">—</p>
+      </div>
+      <div>
+        <p class="label">Intérêts cumulés</p>
+        <p class="value accent" id="stat-interets">—</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <canvas id="chart" role="img" aria-label="Courbe de projection du capital épargne"></canvas>
+  </div>
+
+  <div class="legend">
+    <span><span class="dot-blue"></span>Capital total</span>
+    <span><span class="dot-gray"></span>Versements</span>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script>
+    let chartInstance = null;
+
+    function fmt(v) {
+      return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v);
+    }
+
+    function fmtCompact(v) {
+      return new Intl.NumberFormat('fr-FR', { notation: 'compact', maximumFractionDigits: 1 }).format(v) + ' €';
+    }
+
+    function compute() {
+      const C0 = parseFloat(document.getElementById('capital').value) || 0;
+      const m = parseFloat(document.getElementById('mensuel').value) || 0;
+      const r = (parseFloat(document.getElementById('taux').value) || 0) / 100 / 12;
+      const years = Math.max(1, parseInt(document.getElementById('duree').value) || 1);
+
+      const step = years <= 10 ? 1 : years <= 20 ? 2 : years <= 30 ? 5 : 10;
+      const labels = [], dataCapital = [], dataVerse = [];
+
+      for (let y = 0; y <= years; y++) {
+        if (y === 0 || y % step === 0 || y === years) {
+          labels.push(y === 0 ? 'Départ' : y + 'a');
+          const months = y * 12;
+          const capital = r === 0
+            ? C0 + m * months
+            : C0 * Math.pow(1 + r, months) + m * (Math.pow(1 + r, months) - 1) / r;
+          dataCapital.push(Math.round(capital));
+          dataVerse.push(Math.round(C0 + m * months));
+        }
+      }
+
+      const n = years * 12;
+      const finalCapital = Math.round(r === 0 ? C0 + m * n : C0 * Math.pow(1 + r, n) + m * (Math.pow(1 + r, n) - 1) / r);
+      const totalVerse = Math.round(C0 + m * n);
+
+      document.getElementById('stat-final').textContent = fmt(finalCapital);
+      document.getElementById('stat-verse').textContent = fmt(totalVerse);
+      document.getElementById('stat-interets').textContent = fmt(finalCapital - totalVerse);
+
+      const ctx = document.getElementById('chart').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Capital',
+              data: dataCapital,
+              borderColor: '#1a4d8f',
+              backgroundColor: 'rgba(26,77,143,0.08)',
+              fill: true,
+              tension: 0.35,
+              pointRadius: 0,
+              pointHoverRadius: 4,
+              borderWidth: 2.5
+            },
+            {
+              label: 'Versements',
+              data: dataVerse,
+              borderColor: '#c5d3e0',
+              borderDash: [5, 5],
+              fill: false,
+              tension: 0,
+              pointRadius: 0,
+              borderWidth: 1.5
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#0D1B2A',
+              titleColor: '#7a9ec0',
+              bodyColor: '#ffffff',
+              borderColor: 'rgba(255,255,255,0.1)',
+              borderWidth: 1,
+              callbacks: { label: ctx => ' ' + ctx.dataset.label + ' : ' + fmt(ctx.parsed.y) }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              border: { display: false },
+              ticks: { font: { size: 11 }, color: '#4a6080', maxRotation: 0 }
+            },
+            y: {
+              grid: { color: 'rgba(13,27,42,0.06)' },
+              border: { display: false },
+              ticks: { font: { size: 11 }, color: '#4a6080', callback: v => fmtCompact(v), maxTicksLimit: 5 }
+            }
+          }
+        }
+      });
+    }
+
+    document.querySelectorAll('input').forEach(el => el.addEventListener('input', compute));
+    compute();
+  </script>
+
+</body>
+</html>
